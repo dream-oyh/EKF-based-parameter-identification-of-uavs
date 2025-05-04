@@ -78,7 +78,7 @@ P.IMUAccel_bias = [0 0 0];
 % AHRS
 %P.zAttNoise =  diag([((pi/180)*.2)^2 ((pi/180)*.2)^2 ((pi/180)*.5)^2]'); %Standard deviations for the True Noise for attitude measurements (degrees)
 P.zAttNoise =  [((pi/180)*.2)^2 ((pi/180)*.2)^2 ((pi/180)*.5)^2]'; 
-%P.Ts_AHRS = .01;   % (seconds)
+P.Ts_AHRS = .01;   % (seconds)
 
 %---------------------------------------
 % Barometer
