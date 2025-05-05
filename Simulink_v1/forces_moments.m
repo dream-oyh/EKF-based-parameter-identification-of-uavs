@@ -44,7 +44,7 @@ function out = forces_moments(x, motor, wind, P)
     w_wg    = wind(6); % gust along body z-axis
     
     
-    % robot to wold rotation matrix 
+    % robot to world rotation matrix         body-fixed frame -> n-frame
     R_r2w = [[cos(theta)*cos(psi)  sin(phi)*sin(theta)*cos(psi)-cos(phi)*sin(psi)  cos(phi)*sin(theta)*cos(psi)+sin(phi)*sin(psi)];
              [cos(theta)*sin(psi)  sin(phi)*sin(theta)*sin(psi)+cos(phi)*cos(psi)  cos(phi)*sin(theta)*sin(psi)-sin(phi)*cos(psi)];
              [-sin(theta)    sin(phi)*cos(theta)   cos(phi)*cos(theta) ]];
@@ -85,6 +85,7 @@ function out = forces_moments(x, motor, wind, P)
   b = P.b ;% N/rad/s Lift (thrust) factor
   k = P.k ; %K N.m/rad/s Drag factor
         
+  % Tt is total thrust, also called buyancy, and moments 
     
     A = [[  b   b   b    b]
          [-d*b d*b d*b -d*b]
@@ -100,7 +101,7 @@ function out = forces_moments(x, motor, wind, P)
     
     % Eq. (4.18)
     
-    f_b =  fg_b  - [0 0 Tt(1)]';
+    f_b =  fg_b  - [0 0 Tt(1)]'; % Restore force 
     
     %f_b
          
@@ -115,6 +116,16 @@ function out = forces_moments(x, motor, wind, P)
     alpha = 0;
     beta = 0;
     
+    % calculate daming force
+    X_u = P.X_u;
+    Y_v = P.Y_v;
+    Z_w = P.Z_w;
+    K_p = P.K_p;
+    M_q = P.M_q;
+    N_r = P.N_r;
+
+    Force = Force + [X_u*u; Y_v*v; Z_w*w];
+    Torque = Torque + [K_p*p; M_q*q; N_r*r];
     
     out = [Force; Torque; Va; alpha; beta; w_n; w_e; w_d];
 
