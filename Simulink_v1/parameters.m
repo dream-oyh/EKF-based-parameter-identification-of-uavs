@@ -244,9 +244,9 @@ P.r0     = 0;  % initial body frame yaw rate
 
 % damping coffecient
 
-P.X_u = -4.03;
-P.Y_v = -6.22;
-P.Z_w = -5.18;
+P.X_u = -0.9;
+P.Y_v = -0.8;
+P.Z_w = -1;
 P.K_p = -0.07;
 P.M_q = -0.07;
 P.N_r = -0.07;

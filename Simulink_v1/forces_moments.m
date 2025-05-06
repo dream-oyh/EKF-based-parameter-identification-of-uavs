@@ -124,7 +124,7 @@ function out = forces_moments(x, motor, wind, P)
     M_q = P.M_q;
     N_r = P.N_r;
 
-    Force = Force + [X_u*u; Y_v*v; Z_w*w];
+    Force = Force + [X_u*(u-w_ns); Y_v*(v-w_es); Z_w*(w-w_ds)];
     Torque = Torque + [K_p*p; M_q*q; N_r*r];
     
     out = [Force; Torque; Va; alpha; beta; w_n; w_e; w_d];

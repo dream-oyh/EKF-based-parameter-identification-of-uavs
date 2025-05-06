@@ -90,9 +90,9 @@ P.Jxz  = 0;  %kg.m2
 P.b = 3.2; % N/rad/s Lift (thrust) factor
 P.k = .064; %K N.m/rad/s Drag factor
 %}  
-   block.Dwork(1).Data = [0 0 0 0 0 0 0 0 0 0 0 0 .005 .005 .005 1 0.01 0.005 0.005 0.005 0.005 0.005 0.005];  % initialize x ; initialize state
+   block.Dwork(1).Data = [0 0 0 0 0 0 0 0 0 0 0 0 .005 .005 .005 1 0.01 -0.01 -0.01 -0.01 -0.01 -0.01 -0.01];  % initialize x ; initialize state
    
-   P_ini = diag([1 1 1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .001 .001 .001 .01 .01 0.001 0.001 0.001 0.001 0.001 0.001]);  %  initialize covarianze matrix
+   P_ini = diag([.1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .001 .001 .001 .01 .01 0.01 0.01 0.01 0.001 0.001 0.001]);  %  initialize covarianze matrix
    
    
    block.Dwork(2).Data  = reshape(P_ini,23*23,1);
@@ -359,7 +359,7 @@ end
     
  % U = diag([.0001 .0001 .0001 .0001]);
   %Q = diag([.01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .0001 .0001 .0001 .001 .0001]);
-  Q = diag([.01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .000 .000 .000 .00 .00005 0.01 0.01 0.01 0.01 0.01 0.01]); % n
+  Q = diag([.01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .0001 .0001 .0001 .001 .0001 0.005 0.005 0.005 0.001 0.001 0.001]); % n
   
   %Pdot = Fx*P + P*Fx' + Fu*U*Fu';
   Pdot = Fx*P + P*Fx' + Q;
@@ -373,7 +373,7 @@ end
  %--- p_n, p_e, p_d update
   if (new_pos == 1)&&((conf=='a')||(conf=='b')||(conf=='d') )
      
-       R =  diag([(.1)^2 (.1)^2 (.1)^2]'); 
+       R =  diag([(.05)^2 (.05)^2 (.05)^2]'); 
        
        H =  zeros(3,23); % C: h的偏导
        H(1:3,1:3) = eye(3);    
@@ -404,7 +404,7 @@ end
  %--- p_d update
   if (new_pos == 1)&&((conf=='f') )
      
-       R =  diag([(.1)^2]'); 
+       R =  diag([(.05)^2]'); 
        
        H =  zeros(1,23);
        H(3) = eye(1);    
@@ -539,7 +539,7 @@ end
  % calculate jacobians
  function [Fx Fu] = Jacobians(x,uu,Par)
 
-  pn      = x(1);
+    pn      = x(1);
     pe      = x(2);
     pd      = x(3);
     u       = x(4);
