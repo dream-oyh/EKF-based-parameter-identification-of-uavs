@@ -92,7 +92,7 @@ P.k = .064; %K N.m/rad/s Drag factor
 %}  
    block.Dwork(1).Data = [0 0 0 0 0 0 0 0 0 0 0 0 .005 .005 .005 1 0.01];  % initialize x ; initialize state
    
-   P_ini = diag([1 1 1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .001 .001 .001 .01 .01]);  %  initialize covarianze matrix
+   P_ini = diag([.1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .001 .001 .001 .01 .01]);  %  initialize covarianze matrix
    
    
    block.Dwork(2).Data  = reshape(P_ini,17*17,1);
@@ -352,8 +352,8 @@ end
   [Fx Fu] = Jacobians(x,uu,Par);  
     
  % U = diag([.0001 .0001 .0001 .0001]);
-  %Q = diag([.01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .0001 .0001 .0001 .001 .0001]);
-  Q = diag([.01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .000 .000 .000 .00 .00005]); % n
+  Q = diag([.01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .0001 .0001 .0001 .001 .0001]);
+  % Q = diag([.01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .01 .000 .000 .000 .00 .00005]); % n
   
   %Pdot = Fx*P + P*Fx' + Fu*U*Fu';
   Pdot = Fx*P + P*Fx' + Q;
