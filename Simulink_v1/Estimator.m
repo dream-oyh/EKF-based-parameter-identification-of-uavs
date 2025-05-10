@@ -185,8 +185,6 @@ x = block.Dwork(1).Data; % system state
 
 P = reshape(block.Dwork(2).Data,Par.ident_num,Par.ident_num); % covariance matrix
 
-
-
 % check for new measurements
 new_pos = 0;
 new_vel = 0;
@@ -281,29 +279,32 @@ end
     m = Tt(3); 
     n = Tt(4); 
    %--------------------------
+   Jx_origin = Jx;
+   Jy_origin = Jy;
+   Jz_origin = Jz;
     Jx = Jx - K_p;
     Jy = Jy - M_q;
     Jz = Jz - N_r;
-    % T = Jx*Jz - Jxz^2;
-    % T1 = (Jxz*(Jx - Jy + Jz))/T;
-    % T2 = ((Jz*(Jz - Jy) + Jxz^2))/T;
-    % T3 = Jz/T;
-    % T4 = Jxz/T;
-    % T5 = (Jz - Jx)/Jy;
-    % T6 = Jxz/Jy;
-    % 
-    % T7 = ((Jx-Jy)*Jx + Jxz^2)/T;
-    % T8 = Jx/T;    
-    T = Jx*Jz;
-    T1 = 0;
-    T2 = (Jz - Jy)/Jx;
-    T3 = 1/Jx;
-    T4 = 0;
+    T = Jx*Jz - Jxz^2;
+    T1 = (Jxz*(Jx - Jy + Jz))/T;
+    T2 = ((Jz*(Jz - Jy) + Jxz^2))/T;
+    T3 = Jz/T;
+    T4 = Jxz/T;
     T5 = (Jz - Jx)/Jy;
-    T6 = 0;
+    T6 = Jxz/Jy;
 
-    T7 = (Jx-Jy)/Jz;
-    T8 = 1/Jz;  
+    T7 = ((Jx-Jy)*Jx + Jxz^2)/T;
+    T8 = Jx/T;    
+    % T = Jx*Jz;
+    % T1 = 0;
+    % T2 = (Jz - Jy)/Jx;
+    % T3 = 1/Jx;
+    % T4 = 0;
+    % T5 = (Jz - Jx)/Jy;
+    % T6 = 0;
+    % 
+    % T7 = (Jx-Jy)/Jz;
+    % T8 = 1/Jz;  
     %--------------------------    
     % body to wold rotation matrix   (check)
     R_b2v = [[cos(theta)*cos(psi)  sin(phi)*sin(theta)*cos(psi)-cos(phi)*sin(psi)  cos(phi)*sin(theta)*cos(psi)+sin(phi)*sin(psi)];
@@ -318,9 +319,9 @@ end
     pddot = pdot(3);    
     %--------
     % 3.15
-    udot = (r*v - q*w) +  (1/(mass-X_u))*fx;    
-    vdot = (p*w - r*u) +  (1/(mass-Y_v))*fy;     
-    wdot = (q*u - p*v) +  (1/(mass-Z_w))*fz;
+    udot = ((mass-Y_v)*r*v - (mass-Z_w)*q*w)/(mass-X_u) +  (1/(mass-X_u))*fx;    
+    vdot = ((mass-Z_w)*p*w - (mass-X_u)*r*u)/(mass-Y_v) +  (1/(mass-Y_v))*fy;     
+    wdot = ((mass-X_u)*q*u - (mass-Y_v)*p*v)/(mass-Z_w) +  (1/(mass-Z_w))*fz;
    
     %--------
     % body rotational velocities to euler velocities Rotation matrix    
@@ -363,9 +364,9 @@ end
     x(10) = p + pdot*dt;
     x(11) = q + qdot*dt;
     x(12) = r + rdot*dt;    
-    x(13) = Jx + Jxdot*dt;
-    x(14) = Jy  + Jydot*dt;
-    x(15) = Jz  + Jzdot*dt;
+    x(13) = Jx_origin + Jxdot*dt;
+    x(14) = Jy_origin  + Jydot*dt;
+    x(15) = Jz_origin  + Jzdot*dt;
     x(16) = b  + bdot*dt; 
     x(17) = k  + kdot*dt;
     
@@ -647,35 +648,35 @@ cos(phi)*cos(theta)*v-sin(phi)*cos(theta)*w, ... % phi
 
 par_udot = [
 0,0,0, ... % pn, pe, pd
-0,r,-q, ... % u, v, w
+0,(mass-Y_v)/(mass-X_u)*r,-(mass-Z_w)/(mass-X_u)*q, ... % u, v, w
 0, ... % phi
 -mass*g*cos(theta)/(mass-X_u), ... % theta
 0, ... % psi
-0,-w,v, ... % p, q, r
+0,-(mass-Z_w)/(mass-X_u)*w,(mass-Y_v)/(mass-X_u)*v, ... % p, q, r
 0,0,0,0,0, ... % Jx, Jy, Jz, b, k
--mass*g*sin(theta)/(mass-X_u)^2,0,0,0,0,0 ... % X_u, Y_v, Z_w, K_p, M_q, N_r
+((mass-Y_v)*r*v-(mass-Z_w)*q*w-mass*g*sin(theta))/(mass-X_u)^2,-r*v/(mass-X_u),q*w/(mass-Z_w),0,0,0 ... % X_u, Y_v, Z_w, K_p, M_q, N_r
 ];
  
 par_vdot = [
 0,0,0, ... % pn, pe, pd
--r,0,p, ... % u, v, w
+-(mass-X_u)/(mass-Y_v)*r,0,(mass-Z_w)/(mass-Y_v)*p, ... % u, v, w
 mass*g*cos(theta)*cos(phi)/(mass-Y_v), ... % phi
 -mass*g*sin(theta)*sin(phi)/(mass-Y_v), ... % theta
 0, ... % psi
-w,0,-u, ... % p, q, r
+(mass-Z_w)/(mass-Y_v)*w,0,-(mass-X_u)/(mass-Y_v)*u, ... % p, q, r
 0,0,0,0,0, ... % Jx, Jy, Jz, b, k
-0,mass*g*cos(theta)*sin(phi)/(mass-Y_v)^2,0,0,0,0 ... % X_u, Y_v, Z_w, K_p, M_q, N_r
+r*u/(mass-Y_v),((mass-Z_w)*p*w-(mass-X_u)*r*u+mass*g*cos(theta)*sin(phi))/(mass-Y_v)^2,-p*w/(mass-Y_v),0,0,0 ... % X_u, Y_v, Z_w, K_p, M_q, N_r
 ];
  
 par_wdot = [
 0,0,0, ... % pn, pe, pd
-q,-p,0, ... % u, v, w
+(mass-X_u)/(mass-Z_w)*q,-(mass-Y_v)/(mass-Z_w)*p,0, ... % u, v, w
 -mass*g*cos(theta)*sin(phi)/(mass-Z_w), ... % phi
 -mass*g*sin(theta)*cos(phi)/(mass-Z_w), ... % theta
 0, ... % psi
--v,u,0, ... % p, q, r
+-(mass-Y_v)/(mass-Z_w)*v,(mass-X_u)/(mass-Z_w)*u,0, ... % p, q, r
 0,0,0,-(w_1^2+w_2^2+w_3^2+w_4^2)/(mass-Z_w),0, ... % Jx, Jy, Jz, b, k
-0,0,(mass*g*cos(theta)*cos(phi)-b*(w_1^2+w_2^2+w_3^2+w_4^2))/(mass-Z_w)^2,0,0,0 ... % X_u, Y_v, Z_w, K_p, M_q, N_r
+-q*u/(mass-Z_w),p*v/(mass-Z_w),(q*u*(mass-X_u)-p*v*(mass-Y_v)+mass*g*cos(theta)*cos(phi)-b*(w_1^2+w_2^2+w_3^2+w_4^2))/(mass-Z_w)^2,0,0,0 ... % X_u, Y_v, Z_w, K_p, M_q, N_r
 ];
 
 par_phidot = [
